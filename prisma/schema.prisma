@@ -14,10 +14,48 @@ datasource db {
 }
 
 model User{
-  id              String            @id@default(auto() )@map("_id") @db.ObjectId
+  id              String                @id@default(auto() )@map("_id") @db.ObjectId
   name            String
-  email           String            @unique
+  email           String                @unique
   password        String
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
+  applicants      Applicant[]           @relation("userToApplicant")
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
 }
+
+model Applicant{
+  id                String                  @id@default(auto())@map("_id")@db.ObjectId
+  userId            String                  @db.ObjectId
+  user              User                    @relation("userToApplicant",fields:[userId],references:[id])  
+  name              String  
+  email             String
+  summary           String
+  education         Education?                @relation("applicantToEducation")
+  experience        Experience?               @relation("applicantToExperience")
+  skills            String[]                
+  createdAt         DateTime                 @default(now())  
+  updatedAt         DateTime                 @updatedAt
+}
+
+model Education{
+  id                    String                  @id@default(auto())@map("_id")@db.ObjectId
+  degree                String
+  branch                String
+  institution           String
+  year                  String
+  applicantId           String                  @unique@db.ObjectId
+  applicant             Applicant               @relation("applicantToEducation",fields:[applicantId],references: [id])
+}
+model Experience{
+  id                    String                  @id@default(auto())@map("_id")@db.ObjectId
+  job_title             String
+  company               String
+  applicantId           String                   @unique@db.ObjectId
+  applicant             Applicant               @relation("applicantToExperience",fields:[applicantId],references: [id])
+}
+// model Skill{
+//   id                    String                  @id@default(auto())@map("_id")@db.ObjectId
+//   name                  String
+//   applicantId           String                   @unique@db.ObjectId
+//   applicant             Applicant               @relation("applicantToSkill",fields:[applicantId],references: [id])
+// }
