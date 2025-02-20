@@ -22,7 +22,7 @@ Rename .env.example to .env and enter `DATABASE_URL`,`GEMINI_API_KEY` and `JWT_S
 Start the server
 
 ```bash
-  bun run dev or bun run dev
+  bun run dev or npm run dev
 ```
 
 
