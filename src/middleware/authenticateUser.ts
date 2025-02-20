@@ -23,6 +23,5 @@ export async function authenticateUser(c: Context, next: Next) {
         }, 401)
     }
 
-
     await next();
 }

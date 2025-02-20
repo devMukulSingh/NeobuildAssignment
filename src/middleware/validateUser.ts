@@ -16,7 +16,7 @@ export async function validateUser(c: Context, next: Next) {
 
     if (!(await isAuth(token))) return c.json({
             error: "Unauthenticated, invalid token"
-        }, 401)
+    }, 401)
 
     if (!ObjectId.isValid(userId)) {
         return c.json({

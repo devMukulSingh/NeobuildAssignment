@@ -106,8 +106,7 @@ applicantApp.post("/:userId/get-applicant" ,async(c) => {
                 userId
             }
         })
-
-        if(!applicants) return c.json({
+        if(applicants.length===0) return c.json({
             error:"No such name found"
         },404)
 
