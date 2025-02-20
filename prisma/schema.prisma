@@ -30,8 +30,8 @@ model Applicant{
   name              String  
   email             String
   summary           String
-  education         Education?                @relation("applicantToEducation")
-  experience        Experience?               @relation("applicantToExperience")
+  education         Education[]                @relation("applicantToEducation")
+  experience        Experience[]               @relation("applicantToExperience")
   skills            String[]                               
   createdAt         DateTime                 @default(now())  
   updatedAt         DateTime                 @updatedAt
@@ -43,14 +43,14 @@ model Education{
   branch                String?                 @default("")     
   institution           String?                 @default("")
   year                  String?                 @default("")
-  applicantId           String                  @unique@db.ObjectId
+  applicantId           String                  @db.ObjectId
   applicant             Applicant               @relation("applicantToEducation",fields:[applicantId],references: [id])
 }
 model Experience{
   id                    String                  @id@default(auto())@map("_id")@db.ObjectId
   job_title             String?                 @default("")
   company               String?                 @default("")
-  applicantId           String                   @unique@db.ObjectId
+  applicantId           String                   @db.ObjectId
   applicant             Applicant               @relation("applicantToExperience",fields:[applicantId],references: [id])
 }
 // model Skill{

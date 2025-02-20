@@ -17,26 +17,31 @@ export const responseSchema: ResponseSchema = {
         },
         email: {
             type: SchemaType.STRING,
-            description: "Email of the applicant"
+            description: "Email id of the applicant",
+            example:"mukulsingh2276@gmail.com"
         },
         education: {
             type: SchemaType.OBJECT,
             properties: {
                 degree: {
                     type: SchemaType.STRING,
-                    description: "Degree of the education"
+                    description: "Degree of the education",
+                    example:"Btech, Bsc, Bcom, Bachelor in Tech, Master in Tech"
                 },
                 branch: {
                     type: SchemaType.STRING,
-                    description: "Branch of the education"
+                    description: "Branch of the degree or course",
+                    example:"CS, Mechanical, IT, Electronics, Chemical"
                 },
                 institution: {
                     type: SchemaType.STRING,
-                    description: "Institute/College"
+                    description: "Institute/College from where the applicant is pursuing course/degree",
+                    example:"Delhi University"
                 },
                 year: {
                     type: SchemaType.STRING,
-                    description: "Year at which the education is finished"
+                    description: "Year in which the education was finished",
+                    example:"2020,2023,2024"
                 }
             },
         },
@@ -63,7 +68,7 @@ export const responseSchema: ResponseSchema = {
         },
         summary: {
             type: SchemaType.STRING,
-            description: "Summary of the applicant"
+            description: "Summary of the applicant's career in not more than 20 words"
         }
     }
 }

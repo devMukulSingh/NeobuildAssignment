@@ -20,8 +20,8 @@ export const userSchema = z.object({
 })
 
 export const applicantSchema = z.object({
-    raw_text:z.string({required_error:"raw_text is required"}).trim().min(1,{
-        message:"raw_text is required"
+    url:z.string({required_error:"url is required"}).trim().min(1,{
+        message:"url is required"
     }),
     name: z.string({ required_error: "name is required" }).trim().min(1, {
         message: "name is required"
@@ -33,14 +33,14 @@ export const resumeSchema = z.object({
     email: z.string({ required_error: "Email is required" }),
     summary: z.string({ required_error: "summary is required" }),
     education: z.object({
-        institution : z.string().optional(),
-        degree:z.string().optional(),
-        branch:z.string().optional(),
-        year: z.string().optional()
-    }),
+        institution : z.string().nullable(),
+        degree:z.string().nullable(),
+        branch:z.string().nullable(),
+        year: z.string().nullable(),
+    }).array(),
     experience: z.object({
-        job_title: z.string().optional(),
-        company: z.string().optional(),
-    }),
+        job_title: z.string().nullable(), 
+        company: z.string().nullable(), 
+    }).array(),
     skills : z.string().array().optional()
 })

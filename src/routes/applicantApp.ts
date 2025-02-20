@@ -1,76 +1,129 @@
 import { Hono } from "hono";
 import { applicantSchema, resumeSchema } from "../lib/schema.js";
-import { gemini } from "../lib/helpers.js";
+import { gemini, parsePdfUrl } from "../lib/helpers.js";
 import { prisma, responseSchema } from "../lib/constants.js";
 import { validateUser } from "../middleware/validateUser.js";
 import { authenticateUser } from "../middleware/authenticateUser.js";
+import axios from "axios";
+import PDFParser from "pdf2json";
+import { PdfReader } from "pdfreader";
+
 
 const applicantApp = new Hono()
 
-applicantApp.use("/:userId/create-applicant",validateUser)
+applicantApp.use("/:userId/create-applicant", validateUser)
 applicantApp.use("/:userId/get-applicant", authenticateUser)
 
 
 applicantApp.post("/:userId/create-applicant", async (c) => {
+
+    const { userId } = c.req.param();
+    const body = await c.req.json();
+    let parsedPdfText = "";
+    let llmResponse = ""
+
+    const parsedBody = applicantSchema.pick({ url: true }).safeParse(body)
+
+    if (!parsedBody.success) {
+        return c.json({
+            error: parsedBody.error.errors.map(err => err.message),
+        }, 404)
+    }
+
     try {
-        const { userId } = c.req.param()
-        const body = await c.req.json();
-
-        const parsedBody = applicantSchema.pick({ raw_text: true }).safeParse(body)
-
-        if (!parsedBody.success) {
-            return c.json({
-                error: parsedBody.error.errors.map(err => err.message),
-            }, 404)
-        }
-
-        const response = await gemini({
-            prompt: `This is raw resume data ${parsedBody.data.raw_text}. Parse it to return data in JSON which should exactly match this given schema, also generate the summary based on resume data, which is not given in the data.`,
-            responseSchema: responseSchema
+        parsedPdfText = await parsePdfUrl(parsedBody.data.url);
+    }
+    catch (e) {
+        console.log(e);
+        return c.json({
+            error: "Error parsing pdf " + e
+        }, 500)
+    }
+    // console.log({parsedPdfText});
+    try {
+        llmResponse = await gemini({
+            prompt: `This is raw resume data - ${parsedPdfText}.Parse it carefully and thoroughly.
+            Return data in JSON format which should exactly match the given schema. Insert empty string, if any field is not available.
+            Schema -    
+            {
+                "name": <name>,
+                "email": <email>,
+                "education":
+                    [{
+                    "degree": <degree>,
+                    "branch" : <branch>,
+                    "institution": <institution>,
+                    "year": <year>
+                        }],
+                "experience": 
+                    [{
+                    "job_title": <job_title>,
+                    "company": <company>,
+                    "start_date": <start_date>,
+                    "end_date": <end_date>
+                        }],
+                "skills": [
+                    <skill_1>,
+                    <skill_2>,
+                ],
+                "summary"
+                }
+        
+            `,
         })
+        // console.log({ llmResponse });
+    }
+    catch (e) {
+        console.log(e);
+        return c.json({
+            error: "Error in generating llm response " + e
+        })
+    }
+    if (!llmResponse) {
+        return c.json({
+            error: "Error in parsing resume, please try again later"
+        }, 500)
+    }
+    const jsonParsed = JSON.parse(llmResponse.replace(/\bjson\b|`{3}/g, " "))
+    const parsedResponse = resumeSchema.safeParse(jsonParsed)
+    // console.log({data:parsedResponse.data});
+    if (!parsedResponse.success) {
+        console.log(parsedResponse.error.errors);
+        return c.json({
+            error: `Error in parsing resume ` + parsedResponse.error.errors.map(err => err.message).join(",")
+        }, 500)
+    }
 
-        if(!response){
-            return c.json({
-                error:"Error in parsing resume, please try again later"
-            },500)
-        }   
+    const { education, email, experience, name, skills, summary } = parsedResponse.data
 
-        const parsedResponse = resumeSchema.safeParse(JSON.parse(response))
-        if(!parsedResponse.success){
-            console.log(parsedResponse.error.errors.map(err => err.message));
-            return c.json({
-                error: `Error in parsing resume ` + parsedResponse.error.errors.map(err => err.message).join(",")
-            },500)
-        }
-
-        const { education,email,experience,name,skills,summary } = parsedResponse.data
-
+    try {
         const newApplicant = await prisma.applicant.create({
-            data:{
+            data: {
                 email,
                 name,
                 summary,
-                education:{
-                    create:{
-                        branch:education.branch,
-                        degree:education.degree,
-                        institution:education.institution,
-                        year:education.year
-                    },
+                education: {
+                    createMany : {
+                        data:education
+                    }
 
                 },
-                experience:{
-                    create:{
-                        company:experience.company,
-                        job_title:experience.job_title
-                    }
+                experience: {
+                   createMany:{
+                        data: experience
+                   }
                 },
-                skills:skills,
-                user:{
-                    connect:{
-                        id:userId
+                skills: skills,
+                user: {
+                    connect: {
+                        id: userId
                     }
                 }
+            },
+            include: {
+                education: true,
+                experience: true,
+
             }
         })
 
@@ -82,43 +135,43 @@ applicantApp.post("/:userId/create-applicant", async (c) => {
     catch (e) {
         console.log(e);
         return c.json({
-            error: "Internal server error " + e
+            error: "Error saving new applicant to db " + e
         }, 500)
     }
 })
 
-applicantApp.post("/:userId/get-applicant" ,async(c) => {
-    try{
+applicantApp.post("/:userId/get-applicant", async (c) => {
+    try {
         const { userId } = c.req.param()
         const body = await c.req.json();
-        const parsedBody = resumeSchema.pick({name:true}).safeParse(body);
+        const parsedBody = resumeSchema.pick({ name: true }).safeParse(body);
 
-        if(!parsedBody.success) return c.json({
-            error:parsedBody.error.errors.map( err => err.message)
-        },400)
+        if (!parsedBody.success) return c.json({
+            error: parsedBody.error.errors.map(err => err.message)
+        }, 400)
 
         const applicants = await prisma.applicant.findMany({
-            where:{
-                name:{
-                    mode:"insensitive",
-                    contains:parsedBody.data.name,
+            where: {
+                name: {
+                    mode: "insensitive",
+                    contains: parsedBody.data.name,
                 },
                 userId
             }
         })
-        if(applicants.length===0) return c.json({
-            error:"No such name found"
-        },404)
+        if (applicants.length === 0) return c.json({
+            error: "No such name found"
+        }, 404)
 
         return c.json({
             applicants
-        },200)
+        }, 200)
 
     }
-    catch(e){
+    catch (e) {
         console.log(e);
         return c.json({
-            error:"Internal server error " + e
+            error: "Internal server error " + e
         })
     }
 })
