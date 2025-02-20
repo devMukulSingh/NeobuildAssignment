@@ -32,24 +32,24 @@ model Applicant{
   summary           String
   education         Education?                @relation("applicantToEducation")
   experience        Experience?               @relation("applicantToExperience")
-  skills            String[]                
+  skills            String[]                               
   createdAt         DateTime                 @default(now())  
   updatedAt         DateTime                 @updatedAt
 }
 
 model Education{
   id                    String                  @id@default(auto())@map("_id")@db.ObjectId
-  degree                String
-  branch                String
-  institution           String
-  year                  String
+  degree                String?                 @default("")     
+  branch                String?                 @default("")     
+  institution           String?                 @default("")
+  year                  String?                 @default("")
   applicantId           String                  @unique@db.ObjectId
   applicant             Applicant               @relation("applicantToEducation",fields:[applicantId],references: [id])
 }
 model Experience{
   id                    String                  @id@default(auto())@map("_id")@db.ObjectId
-  job_title             String
-  company               String
+  job_title             String?                 @default("")
+  company               String?                 @default("")
   applicantId           String                   @unique@db.ObjectId
   applicant             Applicant               @relation("applicantToExperience",fields:[applicantId],references: [id])
 }

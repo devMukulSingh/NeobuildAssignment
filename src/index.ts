@@ -1,6 +1,7 @@
 import { serve } from '@hono/node-server'
 import { Hono } from 'hono'
 import authApp from "./routes/authApp.js"
+import applicantApp from './routes/applicantApp.js'
 
 const app = new Hono().basePath("/api/v1")
 
@@ -9,7 +10,7 @@ app.get('/', (c) => {
 })
 
 app.route("/auth",authApp)
-
+app.route("/applicant",applicantApp)
 
 serve({
   fetch: app.fetch,
