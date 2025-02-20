@@ -49,7 +49,6 @@ authApp.post('/register', async (c) => {
     }
 })
 
-
 authApp.post('/login', async (c) => {
 
     const body = await c.req.json();

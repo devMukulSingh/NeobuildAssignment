@@ -4,7 +4,8 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "mig": "bun x prisma db push",
-    "gen": "bun x prisma generate"
+    "gen": "bun x prisma generate",
+    "start":"tsx src/index.ts"
   },
   "dependencies": {
     "@google/generative-ai": "^0.21.0",
