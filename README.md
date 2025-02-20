@@ -59,7 +59,7 @@ To run this project, you will need to add the following environment variables to
 
       400 {"error": ["field" is required] }
       409 {"error": "User already exists"}
-      500 {"error": "Intenal server error"}
+      500 {"error": "Internal server error"}
 
 ### 2. Login 
 ```http
@@ -80,7 +80,7 @@ To run this project, you will need to add the following environment variables to
       400 {"error" : ['field' is required]}
       400 {"error" :"Invalid credentials"} 
       409 {"error" : 'User already exists'}
-      500 {"error" : 'Intenal server error'}
+      500 {"error" : 'Internal server error'}
 
   ### 3. Create applicant 
 ```http
@@ -92,11 +92,56 @@ To run this project, you will need to add the following environment variables to
 - **Request Body**:
 
       {
-        "raw_data":"Scarlett Emerson has email-scarlett.emerson@hollywoodstudios.com. She went to UCLA...Bachelor of Fine Arts, Film Production in Acting specialization & passed out in 2015."
+        "url":"https://www.dhli.in/uploaded_files/resumes/resume_3404.pdf"
       }
 - **Success Responses:**
 
-      200 {"JWT":"ey.121212dfsdfsdfsdasd"}
+        200 {
+        "msg": "applicant created successfully",
+        "newApplicant": {
+            "id": "67b73eadb897ce67131824a4",
+            "userId": "67b5dbd2e76a55f64e76638f",
+            "name": "Prabhat Bhardwaj",
+            "email": "Prabhat.Bhardwaj11@gmail.com",
+            "summary": "Looking forward to enrich my knowledge and skills aligned with the organization’ s ultimate goals speci fic ally in Finance and Accounting.",
+            "skills": [
+                "MS Word",
+                "Advanced Excel",
+                "MS Power P oint",
+                "SAP   (FICO  Module)",
+                "FARVISION",
+                "TALLY. ERP  9",
+                "FINNONE"
+            ],
+            "createdAt": "2025-02-20T14:39:41.004Z",
+            "updatedAt": "2025-02-20T14:39:41.004Z",
+            "education": [
+                {
+                    "id": "67b73eadb897ce67131824a6",
+                    "degree": "B.Com",
+                    "branch": "Prog.",
+                    "institution": "Delhi University",
+                    "year": "2010",
+                    "applicantId": "67b73eadb897ce67131824a4"
+                },
+
+            ],
+            "experience": [
+                {
+                    "id": "67b73eadb897ce67131824a9",
+                    "job_title": "EXECUTIVE - ACCOUNTS & FINANCE",
+                    "company": "CSL FINANCE LIMITED",
+                    "applicantId": "67b73eadb897ce67131824a4"
+                },
+                {
+                    "id": "67b73eadb897ce67131824ac",
+                    "job_title": "SENIOR ASSOCIATE (FINANCE)",
+                    "company": "INNODATA INDIA P RI V A T E L IMI T ED",
+                    "applicantId": "67b73eadb897ce67131824a4"
+                }
+            ]
+        }
+    }
 
 - **Error Responses**
 
@@ -106,7 +151,7 @@ To run this project, you will need to add the following environment variables to
       401 {"error":"Unauthenticated, invalid userId" }
       401 {"error":"Unauthenticated, invalid token" }
       401 {"error":"Unauthenticated, user not found"}
-      500 {"error":"Intenal server error"}
+      500 {"error":"Internal server error"}
 
     ### 4. Get applicant 
 ```http
@@ -123,22 +168,48 @@ To run this project, you will need to add the following environment variables to
 
       200 {"applicants": [
         {
-            "id": "67b6b7836b23f5f238afac90",
+            {
+            "id": "67b73eadb897ce67131824a4",
             "userId": "67b5dbd2e76a55f64e76638f",
-            "name": "Scarlett Emerson",
-            "email": "scarlett.emerson@hollywoodstudios.com",
-            "summary": "Scarlett Emerson is a film professional with experience in directing, cinematography, editing, screenwriting, VFX, and storyboarding. She graduated from UCLA with a Bachelor of Fine Arts in Film Production and has worked as an Assistant Director at Paramount Pictures since June 2018.",
+            "name": "Prabhat Bhardwaj",
+            "email": "Prabhat.Bhardwaj11@gmail.com",
+            "summary": "Looking forward to enrich my knowledge and skills aligned with the organization’ s ultimate goals speci fic ally in Finance and Accounting.",
             "skills": [
-                "Cinematography",
-                "editing (Final Cut Pro)",
-                "screenwriting",
-                "directing",
-                "VFX",
-                "storyboards"
+                "MS Word",
+                "Advanced Excel",
+                "MS Power P oint",
+                "SAP   (FICO  Module)",
+                "FARVISION",
+                "TALLY. ERP  9",
+                "FINNONE"
             ],
-            "createdAt": "2025-02-20T05:02:59.125Z",
-            "updatedAt": "2025-02-20T05:02:59.125Z"
-        },
+            "createdAt": "2025-02-20T14:39:41.004Z",
+            "updatedAt": "2025-02-20T14:39:41.004Z",
+            "education": [
+                {
+                    "id": "67b73eadb897ce67131824a6",
+                    "degree": "B.Com",
+                    "branch": "Prog.",
+                    "institution": "Delhi University",
+                    "year": "2010",
+                    "applicantId": "67b73eadb897ce67131824a4"
+                },
+
+            ],
+            "experience": [
+                {
+                    "id": "67b73eadb897ce67131824a9",
+                    "job_title": "EXECUTIVE - ACCOUNTS & FINANCE",
+                    "company": "CSL FINANCE LIMITED",
+                    "applicantId": "67b73eadb897ce67131824a4"
+                },
+                {
+                    "id": "67b73eadb897ce67131824ac",
+                    "job_title": "SENIOR ASSOCIATE (FINANCE)",
+                    "company": "INNODATA INDIA P RI V A T E L IMI T ED",
+                    "applicantId": "67b73eadb897ce67131824a4"
+                }
+            ]
       ]
       }
 
@@ -150,4 +221,4 @@ To run this project, you will need to add the following environment variables to
       401 {"error":"Unauthenticated, invalid userId" }
       401 {"error":"Unauthenticated, invalid token" }
       401 {"error":"Unauthenticated, user not found"}
-      500 {"error":"Intenal server error"}
+      500 {"error":"Internal server error"}
