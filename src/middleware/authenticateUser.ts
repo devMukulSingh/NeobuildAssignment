@@ -1,10 +1,9 @@
 import type { Context, Next } from "hono";
 import { ObjectId } from 'mongodb';
 import { isAuth } from "../lib/helpers.js";
-import { prisma } from "../lib/constants.js";
 
 
-export async function validateUser(c: Context, next: Next) {
+export async function authenticateUser(c: Context, next: Next) {
 
     const { userId } = c.req.param()
 
@@ -24,15 +23,6 @@ export async function validateUser(c: Context, next: Next) {
         }, 401)
     }
 
-    const existingUser = await prisma.user.findFirst({
-        where:{
-            id:userId
-        }
-    })
-
-    if(!existingUser) return c.json({
-        error:"Unauthenticated, user not found"
-    },401)
 
     await next();
 }

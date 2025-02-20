@@ -3,10 +3,13 @@ import { applicantSchema, resumeSchema } from "../lib/schema.js";
 import { gemini } from "../lib/helpers.js";
 import { prisma, responseSchema } from "../lib/constants.js";
 import { validateUser } from "../middleware/validateUser.js";
+import { authenticateUser } from "../middleware/authenticateUser.js";
 
 const applicantApp = new Hono()
 
-applicantApp.use("/:userId/*",validateUser)
+applicantApp.use("/:userId/create-applicant",validateUser)
+applicantApp.use("/:userId/get-applicant", authenticateUser)
+
 
 applicantApp.post("/:userId/create-applicant", async (c) => {
     try {
@@ -72,7 +75,8 @@ applicantApp.post("/:userId/create-applicant", async (c) => {
         })
 
         return c.json({
-            msg: "applicant created successfully"
+            msg: "applicant created successfully",
+            newApplicant
         }, 200)
     }
     catch (e) {
@@ -83,5 +87,41 @@ applicantApp.post("/:userId/create-applicant", async (c) => {
     }
 })
 
+applicantApp.post("/:userId/get-applicant" ,async(c) => {
+    try{
+        const { userId } = c.req.param()
+        const body = await c.req.json();
+        const parsedBody = resumeSchema.pick({name:true}).safeParse(body);
+
+        if(!parsedBody.success) return c.json({
+            error:parsedBody.error.errors.map( err => err.message)
+        },400)
+
+        const applicants = await prisma.applicant.findMany({
+            where:{
+                name:{
+                    mode:"insensitive",
+                    contains:parsedBody.data.name,
+                },
+                userId
+            }
+        })
+
+        if(!applicants) return c.json({
+            error:"No such name found"
+        },404)
+
+        return c.json({
+            applicants
+        },200)
+
+    }
+    catch(e){
+        console.log(e);
+        return c.json({
+            error:"Internal server error " + e
+        })
+    }
+})
 
 export default applicantApp;
